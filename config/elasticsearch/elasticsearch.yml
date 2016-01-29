@@ -1,0 +1,6 @@
+path:
+  data: /data/data
+  logs: /data/logs
+  plugins: /data/plugins
+  work: /data/work
+  scripts: /data/scripts
