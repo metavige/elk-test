@@ -12,8 +12,6 @@ RUN arch="$(dpkg --print-architecture)" \
   && chmod +x /usr/local/bin/gosu
 
 RUN set -ex \
-  && echo 'Acquire::https { Proxy "http://192.168.0.103:3142"; };' >> /etc/apt/apt.conf.d/20proxy \
-  && echo 'Acquire::http { Proxy "http://192.168.0.103:3142"; };' >> /etc/apt/apt.conf.d/20proxy \
   && apt-get update \
   && apt-get install -y --no-install-recommends vim curl tree htop nginx \
   && groupadd -r elasticsearch && useradd -r -m -g elasticsearch elasticsearch \
