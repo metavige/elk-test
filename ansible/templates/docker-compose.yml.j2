@@ -1,5 +1,5 @@
 elasticsearch:
-  restart: on-failure
+  restart: always
   image: elasticsearch
   ports:
     - 9201:9200
@@ -7,9 +7,10 @@ elasticsearch:
   volumes:
     - ${PWD}/config/elasticsearch/config:/usr/share/elasticsearch/config
     - ${PWD}/config/elasticsearch/data:/data
+  command: elasticsearch -Dcluster.name=elk-es-cluster1 -Dnode.master=true -Dnode.data=true -Ddiscovery.zen.ping.multicast.enabled=false -Ddiscovery.zen.ping_timeout=30s -Ddiscovery.zen.minimum_master_nodes=1 -Ddiscovery.zen.ping.unicast={% for host in groups['all'] %}{% if loop.last -%}{{hostvars[host]['ansible_eth0']['ipv4']['address'] }}:9301{%- else -%}{{hostvars[host]['ansible_eth0']['ipv4']['address'] }}:9301,{%- endif -%}{% endfor %}
 
 kibana:
-  restart: on-failure
+  restart: always
   image: kibana
   ports:
     - 5601:5601
@@ -19,7 +20,7 @@ kibana:
     - elasticsearch
 
 redis:
-  restart: on-failure
+  restart: always
   image: redis
   environment:
     - LOGSPOUT=ignore
@@ -27,11 +28,12 @@ redis:
     - 6379:6379
 
 logstash-indexer:
-  restart: on-failure
+  restart: always
   image: logstash
   command: logstash agent -f /config/logstash.conf
   volumes:
     - ${PWD}/config/logstash/config:/config
+    - ${PWD}/config/logstash/patterns:/opt/logstash/patterns
   environment:
     - LOGSPOUT=ignore
   links:
@@ -39,8 +41,8 @@ logstash-indexer:
     - elasticsearch
 
 logstash-collector:
-  restart: on-failure
-  image: logstash-collector
+  restart: always
+  image: logstash-redis-collector
   command: redis://redis?key=logstash
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
