@@ -26,19 +26,43 @@ redis:
   ports:
     - 6379:6379
 
-logstash-indexer:
+indexer:
   restart: on-failure
   image: logstash
-  command: logstash agent -f /config/logstash.conf
+  command: -f /etc/logstash/conf.d
   volumes:
-    - ${PWD}/config/logstash/config:/config
+    - ${PWD}/config/logstash/config:/etc/logstash/conf.d
   environment:
     - LOGSPOUT=ignore
   links:
     - redis
     - elasticsearch
 
-logstash-collector:
+# filter:
+#   image: logstash
+#   command: logstash agent -f /config/logstash.conf
+#   ports:
+#     - 5000:5000
+#   volumes:
+#     - ${PWD}/config/logstash/filter-config:/config
+#   environment:
+#     - LOGSPOUT=ignore
+#   links:
+#     - redis
+
+# collector:
+#   image: gliderlabs/logspout
+#   command: syslog+tcp://filter:5000
+#   ports:
+#     - 8000:8000
+#   environment:
+#     - LOGSPOUT=ignore
+#   volumes:
+#     - /var/run/docker.sock:/tmp/docker.sock
+#   links:
+#     - filter
+
+collector:
   restart: on-failure
   image: logstash-collector
   command: redis://redis?key=logstash
