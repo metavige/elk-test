@@ -8,11 +8,14 @@
     - name: copy docker-compose
       template: src=templates/docker-compose.yml.j2 dest=/{{ ansible_env.HOME }}/elk-test/docker-compose.yml
 
-    - name: copy sync-pull
-      copy: src=files/sync-pull.sh dest=/{{ ansible_env.HOME }}/elk-test mode=755 backup=yes
+    - name: copy sync-pull.sh
+      copy: src=src/sync-pull.sh dest=/{{ ansible_env.HOME }}/elk-test mode=755 backup=yes
 
     - name: copy all configs
       copy: src=files/config dest=/{{ ansible_env.HOME }}/elk-test/
 
     - name: mkdir elasticsearch config/scripts
       file: path=/{{ ansible_env.HOME }}/elk-test/config/elasticsearch/config/scripts state=directory
+
+    - name: copy startLogCollector.sh
+      copy: src=src/startLogCollector.sh dest=/{{ ansible_env.HOME }}/elk-test mode=755 backup=yes
