@@ -2,8 +2,10 @@ elasticsearch:
   restart: on-failure
   image: elasticsearch
   ports:
-    - 9201:9200
-    - 9301:9300
+    - 9200:9200
+    - 9300:9300
+  environment:
+    - LOGSPOUT=ignore
   volumes:
     - ${PWD}/config/elasticsearch/config:/usr/share/elasticsearch/config
 
@@ -12,6 +14,8 @@ kibana:
   image: kibana
   ports:
     - 5601:5601
+  environment:
+    - LOGSPOUT=ignore
   volumes:
     - ${PWD}/config/kibana:/opt/kibana/config
   links:
@@ -37,6 +41,8 @@ indexer:
     - logstash-config
   environment:
     - LOGSPOUT=ignore
+  ports:
+    - 5000:5000
   links:
     - redis
     - elasticsearch
@@ -69,6 +75,8 @@ collector:
   restart: on-failure
   image: logstash-collector
   command: redis://redis?key=logstash
+  ports:
+    - 8000:8000
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
   links:
