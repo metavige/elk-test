@@ -6,7 +6,6 @@ elasticsearch:
     - 9301:9300
   volumes:
     - ${PWD}/config/elasticsearch/config:/usr/share/elasticsearch/config
-    - ${PWD}/config/elasticsearch/data:/data
 
 kibana:
   restart: on-failure
@@ -26,12 +25,16 @@ redis:
   ports:
     - 6379:6379
 
+logstash-config:
+  image: logstash-config
+  command: /bin/true
+
 indexer:
   restart: on-failure
   image: logstash
   command: -f /etc/logstash/conf.d
-  volumes:
-    - ${PWD}/config/logstash/config:/etc/logstash/conf.d
+  volumes_from:
+    - logstash-config
   environment:
     - LOGSPOUT=ignore
   links:
