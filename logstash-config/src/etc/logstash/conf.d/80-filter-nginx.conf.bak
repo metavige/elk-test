@@ -1,8 +1,0 @@
-filter {
-  grok {
-    match => { "message" => "%{NGINXACCESS}" }
-  }
-  date {
-    match => [ "@timestamp" , "dd/MMM/YYYY:HH:mm:ss Z" ]
-  }
-}
