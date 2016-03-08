@@ -1,21 +1,24 @@
 - hosts: all
-  remote_user: root
+  remote_user: paasuser
+
+  vars:
+    elk-folder: /{{ ansible_env.HOME }}/elk
 
   tasks:
     - name: mkdir
-      file: path=/{{ ansible_env.HOME }}/elk-test state=directory
+      file: path={{ elk-folder }} state=directory
 
     - name: copy docker-compose
-      template: src=templates/docker-compose.yml.j2 dest=/{{ ansible_env.HOME }}/elk-test/docker-compose.yml
+      template: src=templates/docker-compose.yml.j2 dest={{ elk-folder }}/docker-compose.yml
 
     - name: copy sync-pull.sh
-      copy: src=src/sync-pull.sh dest=/{{ ansible_env.HOME }}/elk-test mode=755 backup=yes
+      copy: src=src/sync-pull.sh dest={{ elk-folder }} mode=755 backup=yes
 
     - name: copy all configs
-      copy: src=files/config dest=/{{ ansible_env.HOME }}/elk-test/
+      copy: src=files/config dest={{ elk-folder }}
 
     - name: mkdir elasticsearch config/scripts
-      file: path=/{{ ansible_env.HOME }}/elk-test/config/elasticsearch/config/scripts state=directory
+      file: path={{ elk-folder }}/config/elasticsearch/config/scripts state=directory
 
     - name: copy startLogCollector.sh
-      copy: src=src/startLogCollector.sh dest=/{{ ansible_env.HOME }}/elk-test mode=755 backup=yes
+      copy: src=src/startLogCollector.sh dest={{ elk-folder }} mode=755 backup=yes
