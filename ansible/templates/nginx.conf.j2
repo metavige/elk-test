@@ -1,0 +1,46 @@
+worker_processes  1;
+error_log /dev/stdout info;
+pid        /var/run/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    access_log /dev/stdout;
+
+    sendfile        on;
+    #tcp_nopush     on;
+    keepalive_timeout  65;
+    gzip  on;
+
+    upstream backend {
+      {% for host in groups['all'] %}server {{hostvars[host]['ansible_eth0']['ipv4']['address'] }}:5601;
+      {% endfor %}
+    }
+
+    server {
+        listen 80 default_server;
+
+        # disable any limits to avoid HTTP 413 for large image uploads
+        client_max_body_size 0;
+
+        # required to avoid HTTP 411: see Issue #1486 (https://github.com/docker/docker/issues/1486)
+        chunked_transfer_encoding on;
+
+        location / {
+
+            proxy_pass                          http://backend;
+            proxy_set_header  Host              $http_host;   # required for docker client's sake
+            proxy_set_header  X-Real-IP         $remote_addr; # pass on real client's IP
+            proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header  X-Forwarded-Proto $scheme;
+            proxy_read_timeout                  900;
+        }
+    }
+}
+
+daemon off;

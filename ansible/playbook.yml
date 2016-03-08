@@ -1,24 +1,35 @@
 - hosts: all
-  remote_user: paasuser
 
   vars:
-    elk-folder: /{{ ansible_env.HOME }}/elk
+    - elk_folder: "/{{ ansible_env.HOME }}/elk"
 
   tasks:
     - name: mkdir
-      file: path={{ elk-folder }} state=directory
+      file: path={{ elk_folder }} state=directory
 
     - name: copy docker-compose
-      template: src=templates/docker-compose.yml.j2 dest={{ elk-folder }}/docker-compose.yml
+      template: src=templates/docker-compose.yml.j2 dest={{ elk_folder }}/docker-compose.yml
 
     - name: copy sync-pull.sh
-      copy: src=src/sync-pull.sh dest={{ elk-folder }} mode=755 backup=yes
+      copy: src=src/sync-pull.sh dest={{ elk_folder }} mode=755 backup=yes
 
     - name: copy all configs
-      copy: src=files/config dest={{ elk-folder }}
+      copy: src=files/config dest={{ elk_folder }}
 
     - name: mkdir elasticsearch config/scripts
-      file: path={{ elk-folder }}/config/elasticsearch/config/scripts state=directory
+      file: path={{ elk_folder }}/config/elasticsearch/config/scripts state=directory
 
     - name: copy startLogCollector.sh
-      copy: src=src/startLogCollector.sh dest={{ elk-folder }} mode=755 backup=yes
+      copy: src=src/startLogCollector.sh dest={{ elk_folder }} mode=755 backup=yes
+
+    - name: make nginx config
+      template: src=templates/nginx.conf.j2 dest={{ elk_folder }}/config/nginx/nginx.conf
+
+    - name: add curator cron job
+      sudo: true
+      cron: name="curator"
+            minute="0"
+            hour="*/1"
+            user="paasuser"
+            cron_file="curator_cleaner"
+            job="docker run --link elk_elasticsearch_1:es --rm registry.co/bobrik/curator:3.4.0 --host es --port 9200 delete indices --older-than 7 --time-unit days --timestring '%Y.%m.%d'"
