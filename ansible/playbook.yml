@@ -32,4 +32,4 @@
             hour="*/1"
             user="paasuser"
             cron_file="curator_cleaner"
-            job="docker run --link elk_elasticsearch_1:es --rm registry.co/bobrik/curator:3.4.0 --host es --port 9200 delete indices --older-than 7 --time-unit days --timestring '%Y.%m.%d'"
+            job="docker run --net=elk_default --link elk_elasticsearch_1:es --rm registry.co/bobrik/curator:3.4.0 --host es --port 9200 delete indices --older-than 7 --time-unit days --timestring '%Y.%m.%d'"
