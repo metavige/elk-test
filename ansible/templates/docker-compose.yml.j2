@@ -5,7 +5,7 @@ elasticsearch:
     - 9200:9200
     - 9300:9300
   volumes:
-    - /opt/elasticsearch:/data
+    - /opt/elasticsearch:/usr/share/elasticsearch/data
   command: elasticsearch -Dnetwork.bind_host=0.0.0.0 -Dnetwork.publish_host={{ ansible_default_ipv4.address }} -Dcluster.name=elk-ccasd-cluster1 -Dnode.master=true -Dnode.data=true -Ddiscovery.zen.ping.multicast.enabled=false -Ddiscovery.zen.ping_timeout=10s -Ddiscovery.zen.minimum_master_nodes=1 -Ddiscovery.zen.ping.unicast.hosts={% for host in groups['all'] %}{% if loop.last -%}{{hostvars[host]['ansible_eth0']['ipv4']['address'] }}{%- else -%}{{hostvars[host]['ansible_eth0']['ipv4']['address'] }},{%- endif -%}{% endfor %}
 
 kibana:
